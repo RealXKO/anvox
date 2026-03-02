@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMDb ID & Player</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        
+        #braveAlert { width: 100%; background: #ff4500; color: white; text-align: center; padding: 10px 0; font-weight: bold; font-size: 0.9rem; display: none; }
+        
+        .container { background: #1e1e1e; padding: 25px; border-radius: 8px; width: 350px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .form-group { margin-bottom: 15px; }
+        .hidden { display: none; }
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: #bbb; }
+        input { padding: 10px; width: 100%; border: 1px solid #333; border-radius: 4px; background: #2a2a2a; color: white; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 12px; cursor: pointer; border: none; font-weight: bold; border-radius: 4px; transition: 0.2s; margin-top: 10px; }
+        #searchBtn { background: #f3ce13; color: #000; }
+        #toggleBtn { background: #333; color: #fff; margin-bottom: 20px; }
+        
+        .video-container { width: 95%; max-width: 900px; aspect-ratio: 16 / 9; background: #000; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .status { margin-top: 10px; font-size: 0.85rem; text-align: center; color: #f3ce13; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="braveAlert">It is recommended to use Brave to have less ads.</div>
+
+    <div class="container">
+        <button id="toggleBtn">MODE: MOVIE</button>
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" placeholder="e.g. Stranger Things">
+        </div>
+
+        <div id="seriesFields" class="hidden">
+            <div class="form-group">
+                <label for="season">Season</label>
+                <input type="number" id="season" value="1">
+            </div>
+            <div class="form-group">
+                <label for="episode">Episode</label>
+                <input type="number" id="episode" value="1">
+            </div>
+        </div>
+
+        <button id="searchBtn">Get IMDb ID & Load Player</button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <div class="video-container">
+        <iframe id="videoPlayer" allowfullscreen src="about:blank"></iframe>
+    </div>
+
+    <script>
+        const API_KEY = '19a4f0fe';
+        let isMovie = true;
+
+        // Browser Detection
+        async function checkBrave() {
+            const isBrave = (navigator.brave && await navigator.brave.isBrave()) || false;
+            if (!isBrave) {
+                document.getElementById('braveAlert').style.display = 'block';
+            }
+        }
+        checkBrave();
+
+        const toggleBtn = document.getElementById('toggleBtn');
+        const seriesFields = document.getElementById('seriesFields');
+        const searchBtn = document.getElementById('searchBtn');
+        const statusDiv = document.getElementById('status');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        toggleBtn.addEventListener('click', () => {
+            isMovie = !isMovie;
+            seriesFields.classList.toggle('hidden');
+            toggleBtn.textContent = isMovie ? "MODE: MOVIE" : "MODE: SERIES/EPISODE";
+        });
+
+        searchBtn.addEventListener('click', async () => {
+            const title = document.getElementById('title').value;
+            const season = document.getElementById('season').value;
+            const episode = document.getElementById('episode').value;
+
+            if (!title) {
+                statusDiv.textContent = "Please enter a title.";
+                return;
+            }
+
+            statusDiv.textContent = "Fetching ID...";
+            
+            let url = `https://www.omdbapi.com/?apikey=${API_KEY}&t=${encodeURIComponent(title)}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.Response === "True") {
+                    const id = data.imdbID;
+                    statusDiv.innerHTML = `Loaded ID: <strong>${id}</strong>`;
+
+                    // Construct Embed URL
+                    let embedUrl = isMovie 
+                        ? `https://vidsrc-embed.ru/embed/movie/${id}`
+                        : `https://vidsrc-embed.ru/embed/tv?imdb=${id}&season=${season}&episode=${episode}`;
+
+                    // --- LOGGING TO CONSOLE ---
+                    console.log("--- New Search Result ---");
+                    console.log("Movie Title:", data.Title);
+                    console.log("IMDb ID:", id);
+                    console.log("Iframe URL:", embedUrl);
+                    console.log("-------------------------");
+
+                    videoPlayer.src = embedUrl;
+                } else {
+                    statusDiv.textContent = "Error: " + data.Error;
+                }
+            } catch (err) {
+                statusDiv.textContent = "Connection failed.";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
