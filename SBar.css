@@ -1,0 +1,50 @@
+/* Optional: Adding a little style to make it look modern */
+body{
+    background-color: rgb(0, 0, 0);
+}
+.search-container {
+width: fit-content;
+margin: 50px auto;
+margin-bottom: 0px;
+margin-top: 0px;
+font-family: Arial, sans-serif;
+}
+input[type="text"] {
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 4px;
+width: 250px;
+height:45px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: rgb(255, 69, 0);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            height: 45px;
+        }
+        button:hover {
+            background-color: rgb(255, 120, 0);
+        }
+.MTV {
+    text-align: center;
+}
+
+.hidden {
+  display: none
+}
+
+.ligma {
+width: fit-content;
+margin-top: 10px;
+margin: 10px auto;
+}
+input[type="text2"] {
+padding: 1px;
+border: 1px solid #ccc;
+border-radius: 4px;
+width: 125px;
+height:45px;
+}
